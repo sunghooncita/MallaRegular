@@ -1,140 +1,97 @@
-#include <iostream>
+
+//
+//  Created by Antonio Rueda y Lidia Ortega 
+//
+
 #include <fstream>
-#include <string>
-#include <sstream>
-#include <list>
-#include <map>
+#include <iostream>
 #include <vector>
-#include <stdlib.h>
+#include "img.h"
 
-#include "Coche.h"
-#include "Usuario.h"
-#include "ReanelCar.h"
-
+#include <math.h>
 
 using namespace std;
 
-/**  @author Carlota Calderón Suárez ccs00064@red.ujaen.es
-      @author Lucía Masats Aroza lma00072@red.ujaen.es */
+int main (int argc, const char * argv[])
+{
+    RGBColor blanco (255,255,255);
+    
+    Img img(700, 1300, blanco); // rectángulo de 700 filas x 1300 columnas
+	
+    int nfilas = img.numFilas();
+    int ncol = img.numColumnas();
+    
+        
+    cout << "Imagen creada con " << nfilas << "filas y " << ncol << " columnas." <<endl;
 
-int main(int argc, const char * argv[]) {
+    int r = 0; // azul
+    int g = 0;
+    int b = 255;
+    
+    // sabemos el tamaño de la caja envolvente de los datos, pero volver a calcular 
+
+    double minlat = 35.86688;
+    double maxlat = 43.272616;
+    double minlon = -9.99443;
+    double maxlon = 3.98926;
+
+      
+    // Calculamos el número de pixeles asociados a un grado 
+
+    cout << "lat: xmin = " << minlon <<  ", " << "xmax = " << maxlon << endl;
+    cout << "lon: ymin = " << minlat <<  ", " << "ymax = " << maxlat << endl;
+
+    double rangoy = maxlat - minlat;
+    double rangox = maxlon - minlon;
+
+    cout << "rango x = " << rangox << endl;
+    cout << "rango y = " << rangoy << endl;
+
+    cout << "nfilas = " << nfilas << endl;
+    cout << "ncol = " << ncol << endl;
+
+    double pixelPorGradoY = (double) (nfilas - 1) / rangoy;
+    double pixelPorGradoX = (double) (ncol - 1) / rangox;
 
 
-    //PROGRAMA DE PRUEBA 1
+    cout << "Pixel por Grado X = " << pixelPorGradoX << endl;
+    cout << "Pixel por Grado Y = " << pixelPorGradoY << endl;
 
-    //Ajuste de la tabla completado en el md
-    std::cout<<"PROGRAMA DE PRUEBA 1:"<<endl<<endl;
-    ReanelCar rcar;
-    rcar.mostrarEstadoTabla();
+ 
+    // elegimos las coordenada de un recuadro cualquiera
 
-    //Prueba de rendimiento
+    double lat1 = 40;
+    double lon1 = -8;
 
-    list<Usuario*> listaW = rcar.buscarUsrNomb("W");
-    list<string> nifsW=rcar.ObtenerNifs(listaW);
+    double lat2 = 42.0;
+    double lon2 = -5.0;
 
-    std::cout<<endl<<endl;
+    //Nota: invertir coordenada Y (latitudes)
+    img.pintarRecuadro( ((lon1 - minlon) * pixelPorGradoX), nfilas -1 - (lat1 - minlat) * pixelPorGradoY, 
+                        ((lon2 - minlon) * pixelPorGradoX), nfilas -1 - (lat2 - minlat) * pixelPorGradoY, 255, 0, 0);
 
-    clock_t t_ini = clock();
-    for (auto i = nifsW.begin(); i != nifsW.end(); ++i) {
-        rcar.buscarUsrNif(*i);
+
+    // ejemplo de punto que debe estar por el centro, lo pintamos acto seguido
+
+    double vlat = 39.569748;
+    double vlon = -3.002585;
+
+    int posY = nfilas -1 - (vlat - minlat) * pixelPorGradoY; //Invertir coordenada Y
+    int posX = ((vlon -minlon) * pixelPorGradoX);
+    img.pintarPixelGrande(posX,posY,r,g,b);
+    //img.pintarPixel(posX,posY,r,g,b);
+
+
+    try {
+    img.guardar("../mapaResultado.ppm");
     }
-    std::cout << "Tiempo lectura de la busqueda mediante lista: " << ((clock() - t_ini) / (float) CLOCKS_PER_SEC) << " segs." << std::endl;
-
-    t_ini = clock();
-    for (auto i = nifsW.begin(); i != nifsW.end(); ++i) {
-        rcar.buscarUsrNifTHash(*i);
+    catch(ErrorEscrituraFichero &e) {
+    	cout << "Error al escribir fichero" << endl;
+    	return 1;
     }
-    std::cout << "Tiempo lectura de la busqueda mediante la tabla hash: " << ((clock() - t_ini) / (float) CLOCKS_PER_SEC) << " segs." << std::endl;
-
-
-
-    //PROGRAMA DE PRUEBA 2
-
-    std::cout<<endl<<endl<<endl<<"PROGRAMA DE PRUEBA 2:"<<endl<<endl;
-
-    std::cout << "Ejercicio 3: " << std::endl;
-    rcar.asociaCocheAPRecarga();
-
-    rcar.asignaCocheAUsrYCreaTrayecto(listaW);
-
-    std::cout <<"Los datos de los 10 primeros usuarios que empiezan por W son:\n ";
-    int cont=0;
-    for(auto iterL = listaW.begin(); iterL != listaW.end();iterL++) {
-        std::cout << std::endl << cont << ". Nif: " << (*iterL)->getNif()
-                  << "\n" << "   Clave: " << (*iterL)->getClave()
-                  << "\n" << "   Nombre: " << (*iterL)->getNombre()
-                  << "\n" << "   Direccion: " << (*iterL)->getDireccion()
-                  << "\n" << "   Coche alquilado: " << (*iterL)->getCoche()->getId_matricula()
-                  << "\n" << "   Origen del Trayecto: " << (*iterL)->getCoche()->getPuntoR()->getId()
-                  << "\n" << "   Destino del Trayecto: " << (*iterL)->getCoche()->getPuntoD()->getId() << std::endl;
-        cont++;
-        if (cont == 10) break;
-    }
-
-    std::cout <<std::endl<<std::endl<< "Ejercicio 4: " << std::endl;
-    std::list<Usuario*> lusuWi;
-    lusuWi=rcar.buscarUsrNomb("Wi");
-
-    rcar.aparcarCochesRetraso(lusuWi,2);
-
-    std::cout <<std::endl<<std::endl<< "Ejercicio 5: " << std::endl;
-
-    Usuario* usus8 = rcar.buscarUsrNifTHash("84538382N");
-    std::cout << std::endl  << ".  Nif: " << (usus8)->getNif()
-              << "\n" << "   Clave: " << (usus8)->getClave()
-              << "\n" << "   Nombre: " << (usus8)->getNombre()
-              << "\n" << "   Direccion: " << (usus8)->getDireccion()
-              << "\n" << "   Coche alquilado: " << (usus8)->getCoche()->getId_matricula()
-              << "\n" << "   Origen del Trayecto: " << (usus8)->getCoche()->getPuntoR()->getId()
-              << "\n" << "   Destino del Trayecto: " << (usus8)->getCoche()->getPuntoD()->getId() << std::endl;
-
-    std::cout <<std::endl<<std::endl<< "Ejercicio 6: " << std::endl;
-    rcar.borrarUsuarioTHash("84538382N");
-    if (rcar.buscarUsrNifTHash("84538382N") == nullptr) {
-        std::cout << "El usuario no se encuentra en la lista" << std::endl;
-        rcar.insertarUser(usus8);
-    } else {
-        std::cout << "Usuario encontrado con éxito!!" << std::endl;
-
-    }
-
-
-
-    std::cout <<std::endl<<std::endl<< "Ejercicio 7: " << std::endl;
-    std::list<Usuario*> lusuWa;
-    lusuWa=rcar.buscarUsrNomb("Wa");
-    std::list<std::string> nifsLusuwa;
-    nifsLusuwa = rcar.ObtenerNifs(lusuWa);
-
-    std::cout << "Numero antes de borrar Wa: " << rcar.numeroUsuariosTH() << std::endl;
-    for (auto i = nifsLusuwa.begin(); i != nifsLusuwa.end(); i++) {
-        rcar.borrarUsuarioTHash(*i);
-    }
-    std::cout << "Numeros despues de borrar Wa: " << rcar.numeroUsuariosTH()<< std::endl;
-
-    std::cout <<std::endl<<std::endl<< "Ejercicio 8: " << std::endl;
-
-    rcar.asignaCocheAUsrYCreaTrayecto(lusuWi);
-
-    std::cout <<"Los datos de los 10 primeros usuarios que empiezan por Wi son:\n ";
-    int conti=0;
-    for(auto iterL = lusuWi.begin(); iterL != lusuWi.end();iterL++) {
-        std::cout << std::endl << conti << ".  Nif: " << (*iterL)->getNif()
-                  << "\n" << "   Clave: " << (*iterL)->getClave()
-                  << "\n" << "   Nombre: " << (*iterL)->getNombre()
-                  << "\n" << "   Direccion: " << (*iterL)->getDireccion()
-                  << "\n" << "   Coche alquilado: " << (*iterL)->getCoche()->getId_matricula()
-                  << "\n" << "   Origen del Trayecto: " << (*iterL)->getCoche()->getPuntoR()->getId()
-                  << "\n" << "   Destino del Trayecto: " << (*iterL)->getCoche()->getPuntoD()->getId() << std::endl;
-        conti++;
-        if (conti == 10) break;
-    }
-
-    std::cout <<std::endl<<std::endl<< "Ejercicio 9: " << std::endl;
-
-    std::list<Usuario*> lusuWil;
-    lusuWil=rcar.buscarUsrNomb("Wil");
-    rcar.aparcarCochesRetraso(lusuWil,4);
-
-    return 0;
+    
+    cout << "Operación realizada con exito, ahora visualizarlo con cualquier visor de imágenes" << endl;
+   
+    return EXIT_SUCCESS;
 }
+

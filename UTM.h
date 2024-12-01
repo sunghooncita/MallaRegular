@@ -34,6 +34,7 @@ public:
         longitud=orig.longitud;
         return *this;
     }
+
 };
 
 #endif //PR3_EEDD_UTM_H

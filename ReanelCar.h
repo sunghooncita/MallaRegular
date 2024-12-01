@@ -14,6 +14,7 @@
 #include "Fecha.h"
 #include "Trayecto.h"
 #include "ThashUsuario.h"
+#include "MallaRegular.h"
 #include <atomic>
 
 
@@ -26,8 +27,11 @@ private:
     std::list <Usuario> users;
     ThashUsuario usersNif;
     std::vector<PuntoRecarga> sities;
+    MallaRegular<Coche*> locate;
 
     PuntoRecarga *buscarPunto(int id);
+    void rellenaMalla();
+
 
 public:
 
@@ -85,6 +89,10 @@ public:
 
     void insertarUser(Usuario *usuario);
 
+
+    std::vector<Coche*> buscarCochesRadio(UTM pos, float radioKm);
+
+    std::vector<Coche*> buscarCochesMasCarcano(UTM pos);
 
 };
 

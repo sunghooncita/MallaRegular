@@ -17,4 +17,7 @@ add_executable(STL main.cpp
         Trayecto.h
         Trayecto.cpp
         ThashUsuario.h
-        ThashUsuario.cpp)
+        ThashUsuario.cpp
+        MallaRegular.h
+        Casilla.h
+)

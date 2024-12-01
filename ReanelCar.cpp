@@ -478,3 +478,69 @@ void ReanelCar::insertarUser(Usuario *usuario) {
     usersNif.insertar(clavecita,usuario);
 
 }
+
+
+void ReanelCar::rellenaMalla(){
+
+    std::ifstream ip;
+    std::stringstream columnas2;
+    std::string fila2;
+    int contador2 = 0;
+
+    std::string id = "0";
+    std::string latitude = "0";
+    std::string longitude = "0";
+    std::string max_cars = "0";
+
+    ip.open("../puntos_recarga.csv"); //carpeta de proyecto
+    if (ip.good()) {
+        clock_t t_ini = clock();
+
+        std::getline(ip, fila2);
+        sities.resize(100);
+        int i=0;
+        while (getline(ip, fila2)) {
+            //¿Se ha leído una nueva fila?
+            if (fila2 != "") {
+                columnas2.str(fila2);
+
+
+                getline(columnas2, id, ','); //leemos caracteres hasta encontrar y omitir ';'
+                getline(columnas2, latitude, ',');
+                getline(columnas2, longitude, ',');
+                getline(columnas2, max_cars, ' ');
+                int idst= std::stoi(id);
+                float latitudef = std::stod(latitude);
+                float longitudef = std::stod(longitude);
+                int max_car = std::stoi(max_cars);
+
+               ///@todo no se como hacerlo cmo una malla >-<
+
+                PuntoRecarga precarga(idst, latitudef, longitudef, max_car);
+                sities[i++] = precarga;
+
+                fila2 = "";
+                columnas2.clear();
+            }
+
+
+            contador2++;
+        }
+
+        ip.close();
+
+        std::cout << "Tiempo lectura: " << ((clock() - t_ini) / (float) CLOCKS_PER_SEC) << " segs." << std::endl;
+    } else {
+        std::cout << "Error de apertura en archivo" << std::endl;
+    }
+
+
+};
+
+std::vector<Coche*> ReanelCar::buscarCochesRadio(UTM pos, float radioKm){
+
+};
+
+std::vector<Coche*> ReanelCar::buscarCochesMasCarcano(UTM pos){
+
+};
